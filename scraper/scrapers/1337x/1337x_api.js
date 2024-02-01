@@ -147,7 +147,6 @@ function singleRequest(requestUrl, config = {}, retryIndex = 0) {
   }
 }
 
-
 function parseTableBody(body) {
   return new Promise((resolve, reject) => {
     const $ = cheerio.load(body);
