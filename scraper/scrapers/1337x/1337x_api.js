@@ -85,19 +85,31 @@ function browse(config = {}, retries = 2) {
     });
 }
 
-function singleRequest(requestUrl, config = {}) {
+const resolverUrls = [
+  'http://flaresolverr2:8191',
+  'http://flaresolverr3:8191'
+];
+
+function singleRequest(requestUrl, config = {}, retryIndex = 0) {
   const timeout = config.timeout || defaultTimeout;
   let options = { headers: { 'User-Agent': getRandomUserAgent() }, timeout: timeout };
 
   if (FlaresolverrUserAgent === '' || FlaresolverrCookies === '') {
+    const resolverUrl = resolverUrls[retryIndex];
+
     console.log("using flaresolverr");
-    return axios.post('http://flaresolverr:8191/v1', {
+    return axios.post(`${resolverUrl}/v1`, {
       cmd: 'request.get',
       url: requestUrl,
     }, options)
       .then((response) => {
         if (response.data.status !== 'ok') {
-          throw new Error(`FlareSolverr did not return status 'ok': ${response.data.message}`)
+          if (retryIndex < resolverUrls.length - 1) {
+            // Retry using the next resolver URL
+            return singleRequest(requestUrl, config, retryIndex + 1);
+          } else {
+            throw new Error(`FlareSolverr did not return status 'ok': ${response.data.message}`);
+          }
         }
 
         const body = response.data.solution.response;
@@ -115,11 +127,11 @@ function singleRequest(requestUrl, config = {}) {
 
         return body;
       });
-  }
-  else {
+  } else {
     console.log("using direct request");
     options.headers['User-Agent'] = FlaresolverrUserAgent;
     options.headers['Cookie'] = FlaresolverrCookies;
+
     return axios.get(requestUrl, options)
       .then((response) => {
         const body = response.data;
@@ -131,9 +143,10 @@ function singleRequest(requestUrl, config = {}) {
           throw new Error(`Invalid body contents: ${requestUrl}`);
         }
         return body;
-      })
+      });
   }
 }
+
 
 function parseTableBody(body) {
   return new Promise((resolve, reject) => {
