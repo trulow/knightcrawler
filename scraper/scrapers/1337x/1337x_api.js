@@ -86,8 +86,8 @@ function browse(config = {}, retries = 2) {
 }
 
 const resolverUrls = [
-  'http://flaresolverr2:8191',
-  'http://flaresolverr3:8191'
+  'http://flaresolverr:8191',
+  'http://flaresolverr2:8191'
 ];
 
 function singleRequest(requestUrl, config = {}, retryIndex = 0) {
