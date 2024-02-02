@@ -4,8 +4,9 @@ const { scheduleUpdateSeeders, scheduleUpdateSeedersForNewTorrents } = require('
 function startScraper() {
   if (process.env.ENABLE_SCHEDULING) {
     scheduleScraping();
-    scheduleUpdateSeeders();
-    scheduleUpdateSeedersForNewTorrents();
+    // Currently Broken
+    //scheduleUpdateSeeders();
+    //scheduleUpdateSeedersForNewTorrents();
   } else {
     scrapeAll()
   }
